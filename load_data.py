@@ -1,7 +1,9 @@
+import getopt
 from faker import Faker
 from random import seed
 from random import randint
 import stripe
+import sys
 
 fake = Faker()
 
@@ -44,6 +46,32 @@ def create_invoice(customer_id):
         auto_advance=True
     )
 
-customer_id = create_customer()
-create_invoice(customer_id)
-create_charge(customer_id)
+
+def main(argv):
+    n = 0
+    try:
+        opts, _ = getopt.getopt(argv, 'hn:')
+    except getopt.GetoptError:
+        print('load_data.py -n <number-of-customers>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('load_data.py -n <number-of-customers>')
+            sys.exit()
+        elif opt in ("-n") and arg.isnumeric():
+            n = int(arg)
+    if n <= 0:
+        print('Number of customers should be a positive integer')
+    seed(1)
+    for _ in range(0, n):
+        try:
+            customer_id = create_customer()
+            create_invoice(customer_id)
+            create_charge(customer_id)
+            print('Created customer, charge and invoice. Customer id:', customer_id)
+        except:
+            print('Could not create data!')
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
