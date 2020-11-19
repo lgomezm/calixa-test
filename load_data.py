@@ -1,13 +1,24 @@
 import getopt
 from faker import Faker
+import os
 from random import seed
 from random import randint
 import stripe
 import sys
+import logging
+
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
 fake = Faker()
+stripe.api_key = os.environ['STRIPE_API_KEY']
 
-stripe.api_key = "pk_test_51HobYRHLGNtIeaaJJvGLE311aGRFwFKj1GJubdrHcNCqq3hiyqpjiQzryvZd0LZtYm9Nd7pOj0R05zpuyeOmcE9C00TFkjHMov"
 
 def create_customer():
     """Creates a customer in the stripe account"""
@@ -22,6 +33,7 @@ def create_customer():
     )
     return customer_id
 
+
 def create_charge(customer_id):
     """Creates a customer with a random amount"""
     stripe.Charge.create(
@@ -29,6 +41,7 @@ def create_charge(customer_id):
         currency='usd',
         customer=customer_id
     )
+
 
 def create_invoice(customer_id):
     """Creates an invoice with a random amount"""
@@ -68,9 +81,9 @@ def main(argv):
             customer_id = create_customer()
             create_invoice(customer_id)
             create_charge(customer_id)
-            print('Created customer, charge and invoice. Customer id:', customer_id)
+            logging.info('Created customer, charge and invoice. Customer id: %s', customer_id)
         except:
-            print('Could not create data!')
+            logging.warning('Could not create data!')
 
 
 if __name__ == "__main__":
