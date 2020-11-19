@@ -5,7 +5,7 @@ def add_customer_status(status):
     """Stores a customer status. If there was already N status objects
     for the customer, it drops the oldest one and returns true.
     Otherwise, it just stores the status and returns false""" 
-    customer = status['customer']
+    customer = status.customer
     if customer not in customer_status_store:
         customer_status_store[customer] = []
     customer_status = customer_status_store[customer]

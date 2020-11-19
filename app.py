@@ -1,13 +1,15 @@
 from dao import customer_status_dao
+import encoder
+from model import model
 from flask import Flask, request
 import os
 import stripe
 
 stripe.api_key = os.environ['STRIPE_API_KEY']
-app = Flask(__name__)
 
-N = 10
-customer_events = {}
+app = Flask(__name__)
+app.json_encoder = encoder.MyEncoder
+
 
 @app.route('/stripe', methods=['POST'])
 def store_stripe_event():
@@ -17,20 +19,20 @@ def store_stripe_event():
         event = stripe.Event.construct_from(body, stripe.api_key)
     except ValueError:
         return {'error': 'Could not parse event'}
-    record = None
+    customer_status = None
     try:
         data = event.data.object
-        record = {
-            'customer': data.customer,
-            'status': data.status,
-            'type': data.object,
-            'amount': data.amount
-        }
+        customer_status = model.CustomerStatus(
+            customer=data.customer,
+            amount=data.amount,
+            status=data.status,
+            object_type=data.object
+        )
     except AttributeError:
         return {'error': 'Could not get one of expected attributes: [customer, amount, status]'}
-    if record['customer'] is None:
+    if customer_status.customer is None:
         return {'error': 'customer is null'}
-    customer_status_dao.add_customer_status(record)
+    customer_status_dao.add_customer_status(customer_status)
     return {}
 
 
