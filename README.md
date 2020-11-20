@@ -3,7 +3,8 @@
 You should create an environment variable called STRIPE_API_KEY with your stripe api key.
 
 Before running any script, execute the following commands:
-```$ virtualenv .venv
+```
+$ virtualenv .venv
 $ source .venv/bin/activate
 $ pip install -r requirements.txt
 ```
